@@ -1,0 +1,151 @@
+{
+  "type": "scalar.function",
+  "input_schema": {
+    "type": "object",
+    "description": "A single photograph of a cat to be evaluated for lighting effectiveness. No metadata, camera settings, or additional context is provided — the function assesses the image exactly as a viewer would, judging whether the light reveals the cat clearly, with detail, and comfortably.",
+    "properties": {
+      "photograph": {
+        "type": "image",
+        "description": "A photograph containing a cat as its subject. The lighting in this image will be evaluated for how effectively it reveals the cat — whether the cat is visible, whether its fur and features are rendered with detail and texture, and whether the light feels natural and comfortable to look at."
+      }
+    },
+    "required": [
+      "photograph"
+    ]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.photograph"
+            },
+            {
+              "type": "text",
+              "text": "I took this photo of my cat. Can you see the cat clearly in this image, or is it lost in the lighting?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "Yes, the cat is clearly visible. I can easily make out its full shape — head, ears, and body — against the background. The light provides enough contrast and clarity for the cat to stand out as a distinct, recognizable subject in the image."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "Partially. I can tell there's a cat, but parts of it are hard to distinguish from the surroundings. Some areas of the cat's body or face blend into shadow or are washed out, making it difficult to see the whole cat clearly."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat is very difficult to see. It's mostly lost — either swallowed by deep shadow, blown out by overexposure, or reduced to a silhouette against the background. I can barely make out that there's a cat here at all."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are helping a user select the best photos of their cat. Focus on whether the lighting reveals the cat's physical details — its fur texture, eye shine, whiskers, and facial contours — or whether the light flattens or erases those features. This is not about photographic sharpness. It is about whether the light gives the cat dimension and physical presence."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.photograph"
+            },
+            {
+              "type": "text",
+              "text": "How well does the lighting in this photo show my cat's fur, eyes, and features?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The lighting reveals your cat beautifully. I can see the texture and dimension of the fur — it looks soft and real, not flat. The eyes catch light and have life to them. The contours of the face, whiskers, and body all come through with depth. The light is doing generous work here, showing what your cat actually looks like."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The lighting shows some detail but not a lot. I can make out the general look of the fur and some features, but the coat lacks dimension in places. The eyes and facial contours are somewhat visible, but the light isn't doing much to bring out the cat's physical character. It's adequate, not generous."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The lighting fails to reveal much detail at all. The fur looks like a uniform mass with no visible texture. The eyes and facial features are either lost in shadow or washed out by overexposure. The cat looks like a flat shape rather than a living animal with fur, whiskers, and physical presence."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Look at this photo of a cat. Does the lighting look natural? Is the image comfortable and pleasant to look at, or does something about the light feel off or distracting? Consider color casts, flash artifacts, and harsh contrast."
+            },
+            {
+              "$jmespath": "input.photograph"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The lighting looks natural and the image is comfortable to look at. The colors feel coherent and honest — whether warm or cool, they don't feel distorted. There are no harsh flash artifacts, no jarring shadows, and no extreme contrast pulling my eye away from the cat. The light lets me look at the cat easily and pleasantly. I notice the cat before I notice the light."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The lighting is mostly fine, but something is slightly off. There might be a mild color cast, a bit of harshness from a flash, or some contrast that feels a touch unnatural. It's not unpleasant, but the light draws a little attention to itself rather than letting me focus entirely on the cat."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The lighting feels unnatural or uncomfortable. I notice significant problems — a strong color cast that distorts the cat's appearance, harsh flash creating blank reflective eyes and hard shadows, or extreme contrast that makes the image jarring to look at. The light is distracting, and I notice it before I notice the cat."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    }
+  ],
+  "description": "Scores how well the lighting in a photograph reveals a cat as its subject. Evaluates visibility, detail and texture, and naturalness across a 0-to-1 scale. High scores mean light that lets you see the cat clearly and comfortably. Low scores mean the cat is lost to shadow, overexposure, silhouette, or distortion."
+}
